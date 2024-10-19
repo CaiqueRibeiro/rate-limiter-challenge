@@ -8,8 +8,9 @@ type Conf struct {
 	RedisPort              int    `mapstructure:"REDIS_PORT"`
 	RedisPass              string `mapstructure:"REDIS_PASSWORD"`
 	RedisDB                int    `mapstructure:"REDIS_DB"`
-	IPMaxRequests          int    `mapstructure:"RATE_LIMITER_IP_MAX_REQUESTS"`
-	TimeWindowMilliseconds int    `mapstructure:"RATE_LIMITER_TIME_WINDOW_MILISECONDS"`
+	IPMaxRequests          int    `mapstructure:"IP_MAX_REQUESTS"`
+	TokenMaxRequests       int    `mapstructure:"TOKEN_MAX_REQUESTS"`
+	TimeWindowMilliseconds int    `mapstructure:"LIMIT_TIME_WINDOW_MS"`
 }
 
 func Load(path string) (*Conf, error) {

@@ -19,25 +19,25 @@ type Middleware struct {
 }
 
 type Server struct {
-	Router   chi.Router
-	Port     int
-	Handlers []Handler
-	// Middlewares []Middleware
+	Router      chi.Router
+	Port        int
+	Handlers    []Handler
+	Middlewares []Middleware
 }
 
-func NewServer(serverPort int, handlers []Handler) *Server {
+func NewServer(serverPort int, handlers []Handler, middlewares []Middleware) *Server {
 	return &Server{
-		Router:   chi.NewRouter(),
-		Port:     serverPort,
-		Handlers: handlers,
-		// Middlewares: middlewares,
+		Router:      chi.NewRouter(),
+		Port:        serverPort,
+		Handlers:    handlers,
+		Middlewares: middlewares,
 	}
 }
 
 func (s *Server) Run() {
-	// for _, m := range s.Middlewares {
-	// 	s.Router.Use(m.Handler)
-	// }
+	for _, m := range s.Middlewares {
+		s.Router.Use(m.Handler)
+	}
 	for _, h := range s.Handlers {
 		s.Router.MethodFunc(h.Method, h.Path, h.HandlerFunc)
 	}
