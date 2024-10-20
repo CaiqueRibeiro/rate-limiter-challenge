@@ -1,6 +1,3 @@
-networks:
-  rate-limiter:
-
 services:
   redis:
     hostname: redis
@@ -17,3 +14,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - path: ./.env
+        required: true
+    container_name: rl-api
+    ports:
+      - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
+    networks:
+      - rate-limiter
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+
+networks:
+  rate-limiter:
+

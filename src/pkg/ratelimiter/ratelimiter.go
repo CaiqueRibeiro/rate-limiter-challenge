@@ -41,9 +41,14 @@ func (rl *RateLimiter) Check(ctx context.Context, r *http.Request) (*strategies.
 
 	apiKey := r.Header.Get("API_KEY")
 
+	/*
+		Here I have to, instead of accepting any API_KEY, configure it previously in redis.
+		if apiKey != "", I have to verify if it exists in redis and get the amount to set as 'limit'
+	*/
 	if apiKey != "" {
 		key = apiKey
-		limit = int64(rl.MaxRequestsPerToken)
+		limit = int64(rl.MaxRequestsPerToken) // CHANGE HERE TO GET MAX PER TOKEN FROM REDIS
+		// if error getting the limit, set as IP limiter
 	} else {
 		key = rip.GetClientIP(r)
 		limit = int64(rl.MaxRequestsPerIP)

@@ -52,7 +52,6 @@ func (rls *RedisLimiter) Check(ctx context.Context, r *Request) (*Response, erro
 
 	currentCount, err := getResult.Int64()
 	if err != nil && errors.Is(err, redis.Nil) {
-		// Fail-safe in case there's an error while getting the count
 		currentCount = 0
 	}
 

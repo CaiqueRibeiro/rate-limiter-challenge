@@ -43,7 +43,7 @@ func (rlm *RateLimiterMiddleware) Handle(next http.Handler) http.Handler {
 		if result.Result == limiter.Deny {
 			w.WriteHeader(http.StatusTooManyRequests)
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": "amount of requests exceeded",
+				"message": "you have reached the maximum number of requests or actions allowed within a certain time frame",
 			})
 			return
 		}
