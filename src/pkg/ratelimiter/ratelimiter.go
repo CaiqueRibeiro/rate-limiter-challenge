@@ -2,6 +2,7 @@ package ratelimiter
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,9 +40,11 @@ func (rl *RateLimiter) Check(ctx context.Context, r *http.Request) (*strategies.
 	apiKey := r.Header.Get("API_KEY")
 
 	if apiKey != "" {
-		tokenMaxRequests, err := rl.Strategy.CheckTokenLimit(r.Context(), key)
+		fmt.Printf("TOKEN A SER VERIFICADO: %s\n", apiKey)
+		tokenMaxRequests, err := rl.Strategy.CheckTokenLimit(r.Context(), apiKey)
 
 		if err != nil {
+			fmt.Println("Não achou, vai ser por IP")
 			key = rip.GetClientIP(r)
 			limit = int64(rl.MaxRequestsPerIP)
 		} else { // if no token found, set as IP even with API_KEY present
