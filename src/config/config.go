@@ -9,7 +9,6 @@ type Conf struct {
 	RedisPass              string `mapstructure:"REDIS_PASSWORD"`
 	RedisDB                int    `mapstructure:"REDIS_DB"`
 	IPMaxRequests          int    `mapstructure:"IP_MAX_REQUESTS"`
-	TokenMaxRequests       int    `mapstructure:"TOKEN_MAX_REQUESTS"`
 	TimeWindowMilliseconds int    `mapstructure:"LIMIT_TIME_WINDOW_MS"`
 }
 

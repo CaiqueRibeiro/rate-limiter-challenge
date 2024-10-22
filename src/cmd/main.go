@@ -18,15 +18,6 @@ func main() {
 		panic(err)
 	}
 
-	exampleHandler := handlers.NewExampleHandler()
-	handlers := []web.Handler{
-		{
-			Path:        "/",
-			Method:      "GET",
-			HandlerFunc: exampleHandler.Get,
-		},
-	}
-
 	redisDB, err := database.NewRedisDatabase(*cfg)
 	if err != nil {
 		panic("cannot connect to Redis")
@@ -35,11 +26,25 @@ func main() {
 	redisStrategy := strategies.NewRedisLimiter(redisDB.Client, time.Now)
 	rateLimiter := ratelimiter.NewRateLimiter(redisStrategy, cfg.IPMaxRequests, cfg.TimeWindowMilliseconds)
 	rlMiddleware := middlewares.NewRateLimiterMiddleware(rateLimiter)
-
 	middlewares := []web.Middleware{
 		{
 			Name:    "RateLimiter",
 			Handler: rlMiddleware.Handle,
+		},
+	}
+
+	exampleHandler := handlers.NewExampleHandler()
+	tokenHandler := handlers.NewTokenHandler(redisDB.Client)
+	handlers := []web.Handler{
+		{
+			Path:        "/",
+			Method:      "GET",
+			HandlerFunc: exampleHandler.Get,
+		},
+		{
+			Path:        "/token",
+			Method:      "POST",
+			HandlerFunc: tokenHandler.Create,
 		},
 	}
 
