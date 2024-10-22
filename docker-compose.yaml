@@ -16,20 +16,25 @@ services:
       retries: 3
 
   api:
+    container_name: rl_api
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
       - path: ./.env
         required: true
-    container_name: rl-api
     ports:
       - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
+    depends_on:
+      redis:
+        condition: service_started
     networks:
       - rate-limiter
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
 
 networks:
   rate-limiter:

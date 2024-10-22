@@ -18,7 +18,7 @@ type Request struct {
 	Duration time.Duration
 }
 
-type Response struct {
+type LimitResponse struct {
 	Result    Result
 	Limit     int64
 	Total     int64
@@ -27,5 +27,6 @@ type Response struct {
 }
 
 type LimiterStrategyInterface interface {
-	Check(ctx context.Context, r *Request) (*Response, error)
+	CheckTokenLimit(ctx context.Context, token string) (int64, error)
+	CheckLimit(ctx context.Context, r *Request) (*LimitResponse, error)
 }

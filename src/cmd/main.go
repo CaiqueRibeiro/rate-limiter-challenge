@@ -33,7 +33,7 @@ func main() {
 	}
 
 	redisStrategy := strategies.NewRedisLimiter(redisDB.Client, time.Now)
-	rateLimiter := ratelimiter.NewRateLimiter(redisStrategy, cfg.IPMaxRequests, cfg.TokenMaxRequests, cfg.TimeWindowMilliseconds)
+	rateLimiter := ratelimiter.NewRateLimiter(redisStrategy, cfg.IPMaxRequests, cfg.TimeWindowMilliseconds)
 	rlMiddleware := middlewares.NewRateLimiterMiddleware(rateLimiter)
 
 	middlewares := []web.Middleware{

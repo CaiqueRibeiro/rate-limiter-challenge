@@ -10,45 +10,44 @@ import (
 )
 
 type RateLimiterInterface interface {
-	Check(ctx context.Context, r *http.Request) (*strategies.Response, error)
+	Check(ctx context.Context, r *http.Request) (*strategies.LimitResponse, error)
 }
 
 type RateLimiter struct {
-	Strategy            strategies.LimiterStrategyInterface
-	MaxRequestsPerIP    int
-	MaxRequestsPerToken int
-	TimeWindowMillis    int
+	Strategy         strategies.LimiterStrategyInterface
+	MaxRequestsPerIP int
+	TimeWindowMillis int
 }
 
 func NewRateLimiter(
 	strategy strategies.LimiterStrategyInterface,
 	ipMaxReqs int,
-	tokenMaxReqs int,
 	timeWindow int,
 ) *RateLimiter {
 	return &RateLimiter{
-		Strategy:            strategy,
-		MaxRequestsPerIP:    ipMaxReqs,
-		MaxRequestsPerToken: tokenMaxReqs,
-		TimeWindowMillis:    timeWindow,
+		Strategy:         strategy,
+		MaxRequestsPerIP: ipMaxReqs,
+		TimeWindowMillis: timeWindow,
 	}
 }
 
-func (rl *RateLimiter) Check(ctx context.Context, r *http.Request) (*strategies.Response, error) {
+func (rl *RateLimiter) Check(ctx context.Context, r *http.Request) (*strategies.LimitResponse, error) {
 	var key string
 	var limit int64
 	duration := time.Duration(rl.TimeWindowMillis) * time.Millisecond
 
 	apiKey := r.Header.Get("API_KEY")
 
-	/*
-		Here I have to, instead of accepting any API_KEY, configure it previously in redis.
-		if apiKey != "", I have to verify if it exists in redis and get the amount to set as 'limit'
-	*/
 	if apiKey != "" {
-		key = apiKey
-		limit = int64(rl.MaxRequestsPerToken) // CHANGE HERE TO GET MAX PER TOKEN FROM REDIS
-		// if error getting the limit, set as IP limiter
+		tokenMaxRequests, err := rl.Strategy.CheckTokenLimit(r.Context(), key)
+
+		if err != nil {
+			key = rip.GetClientIP(r)
+			limit = int64(rl.MaxRequestsPerIP)
+		} else { // if no token found, set as IP even with API_KEY present
+			key = apiKey
+			limit = tokenMaxRequests
+		}
 	} else {
 		key = rip.GetClientIP(r)
 		limit = int64(rl.MaxRequestsPerIP)
@@ -60,7 +59,7 @@ func (rl *RateLimiter) Check(ctx context.Context, r *http.Request) (*strategies.
 		Duration: duration,
 	}
 
-	result, err := rl.Strategy.Check(r.Context(), req)
+	result, err := rl.Strategy.CheckLimit(r.Context(), req)
 	if err != nil {
 		return nil, err
 	}

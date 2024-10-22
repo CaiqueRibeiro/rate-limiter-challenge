@@ -1,17 +1,15 @@
-FROM golang:1.21.6-alpine3.19 AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/server cmd/main.go
+RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-w -s" -o server src/cmd/main.go
 
-# ----------------------------
-
-FROM alpine:3.19
+FROM scratch
 
 WORKDIR /app
-COPY --from=builder /app/bin/server .
+COPY --from=builder /app/server .
 COPY --from=builder /app/.env .
 
 ENTRYPOINT [ "./server" ]
