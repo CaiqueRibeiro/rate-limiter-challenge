@@ -19,13 +19,11 @@ func TestRedisLimiterStrategy(t *testing.T) {
 	ipMaxReqs := 5
 	timeWindow := int64(1000)
 	token := "dummy_token"
-
+	key := fmt.Sprintf("limit:%s", token)
+	expectedTTL := time.Duration(timeWindow) * time.Millisecond
 	strategy := NewRedisLimiter(db, mockNow)
 
 	t.Run("Should allow when key is informed for first time", func(t *testing.T) {
-		expectedTTL := time.Duration(timeWindow) * time.Millisecond
-		key := fmt.Sprintf("limit:%s", token)
-
 		clientMock.ExpectGet(key).RedisNil()
 		clientMock.ExpectIncr(key).SetVal(1)
 		clientMock.ExpectTTL(key).SetVal(time.Duration(-1))
@@ -51,9 +49,6 @@ func TestRedisLimiterStrategy(t *testing.T) {
 	})
 
 	t.Run("Should allow key exists and limit is not reached yet", func(t *testing.T) {
-		expectedTTL := time.Duration(timeWindow) * time.Millisecond
-		key := fmt.Sprintf("limit:%s", token)
-
 		clientMock.ExpectGet(key).SetVal("1")
 		clientMock.ExpectTTL(key).SetVal(expectedTTL)
 		clientMock.ExpectIncr(key).SetVal(2)
@@ -78,9 +73,6 @@ func TestRedisLimiterStrategy(t *testing.T) {
 	})
 
 	t.Run("Should allow key exists and limit is reached", func(t *testing.T) {
-		expectedTTL := time.Duration(timeWindow) * time.Millisecond
-		key := fmt.Sprintf("limit:%s", token)
-
 		clientMock.ExpectGet(key).SetVal(fmt.Sprint(ipMaxReqs))
 		clientMock.ExpectTTL(key).SetVal(expectedTTL)
 		clientMock.ExpectIncr(key).SetVal(2)
