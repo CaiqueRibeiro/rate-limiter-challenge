@@ -37,6 +37,7 @@ func (h *TokenHandler) Create(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(TokenResponse{
 			Message: "Unable to read the body",
 		})
+		return
 	}
 
 	if dto.Token == "" || dto.MaxRequests <= 0 {
@@ -44,6 +45,7 @@ func (h *TokenHandler) Create(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(TokenResponse{
 			Message: "Invalid body",
 		})
+		return
 	}
 
 	key := fmt.Sprintf("token_max_req:%s", dto.Token)

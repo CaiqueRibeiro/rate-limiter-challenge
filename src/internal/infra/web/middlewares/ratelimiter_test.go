@@ -72,11 +72,11 @@ func TestRateLimiterMiddlewareHandleDeny(t *testing.T) {
 	mockLimiter.AssertExpectations(t)
 }
 
-func TestRateLimiterMiddleware_Handle_InternalServerError(t *testing.T) {
+func TestRateLimiterMiddlewareHandleInternalServerError(t *testing.T) {
 	mockLimiter := new(RateLimiterMock)
 	middleware := NewRateLimiterMiddleware(mockLimiter)
 
-	mockLimiter.On("Check", mock.Anything, mock.Anything).Return(nil, http.ErrHandlerTimeout)
+	mockLimiter.On("Check", mock.Anything, mock.Anything).Return((*strategies.LimitResponse)(nil), http.ErrHandlerTimeout)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rr := httptest.NewRecorder()
